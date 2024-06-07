@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <svg></svg>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="sidebar" id="sidebar">
+        <p>function customCode(adjMatrix, startNode, endNode) {</p>
+        <textarea id="codeInput" placeholder="Enter your JavaScript code here..."></textarea>
+        <p>}</p>
+    </div>
+    <div class="content">
+        <div class="graph" id="graph">Graph will be rendered here</div>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Algorithm</th>
+                        <th>Time (ms)</th>
+                    </tr>
+                </thead>
+                <tbody id="timeTable">
+                    <!-- Rows will be added here dynamically -->
+                </tbody>
+            </table>
+        </div>
+        <div class="controls">
+            <label for="toggleCustomCode">Execute Custom Code</label>
+            <input type="checkbox" id="toggleCustomCode">
+            <button id="startButton">Start</button>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/svg.js/3.2.0/svg.min.js" integrity="sha512-EmfT33UCuNEdtd9zuhgQClh7gidfPpkp93WO8GEfAP3cLD++UM1AG9jsTUitCI9DH5nF72XaFePME92r767dHA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="script.js"></script>
+</body>
+</html>
