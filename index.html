@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <svg></svg>
     <link rel="stylesheet" href="style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
     <div class="sidebar" id="sidebar">
@@ -13,7 +13,31 @@
         <p>}</p>
     </div>
     <div class="content">
-        <div class="graph" id="graph">Graph will be rendered here</div>
+        <div class="graph" id="graph">
+            <div id="mynetwork"></div>
+        </div>
+        <button id="genGraphBttn">generate graph</button>
+        <div>
+            <h3>Add Node</h3>
+            <button onclick="addNode()">Add Node</button>
+        </div>
+        <div>
+            <h3>Remove Node</h3>
+            <button onclick="removeNode()">Remove Node</button>
+        </div>
+        <div>
+            <h3>Add Edge</h3>
+            <input type="number" id="fromNode" placeholder="From Node ID">
+            <input type="number" id="toNode" placeholder="To Node ID">
+            <input type="number" id="weigthNode" placeholder="weigth">
+            <button onclick="addEdge()">Add Edge</button>
+        </div>
+        <div style="margin-bottom: 40px;">
+            <h3>Remove Edge</h3>
+            <input type="number" id="removeFromNode" placeholder="From Node ID">
+            <input type="number" id="removeToNode" placeholder="To Node ID">
+            <button onclick="removeEdge()">Remove Edge</button>
+        </div>
         <div class="table-container">
             <table>
                 <thead>
@@ -23,18 +47,27 @@
                     </tr>
                 </thead>
                 <tbody id="timeTable">
-                    <!-- Rows will be added here dynamically -->
                 </tbody>
             </table>
         </div>
         <div class="controls">
-            <label for="toggleCustomCode">Execute Custom Code</label>
-            <input type="checkbox" id="toggleCustomCode">
+
+            <label for="startNode">start node:</label>
+            <input placeholder="Ex: 0" type="text" id="startNode">
+
+            <label for="endNode">end node:</label>
+            <input placeholder="Ex: 7" type="text" id="endNode">
+
+            <div>
+                <label for="toggleCustomCode">Execute Custom Code</label>
+                <input type="checkbox" id="toggleCustomCode">
+            </div>
+
             <button id="startButton">Start</button>
         </div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/svg.js/3.2.0/svg.min.js" integrity="sha512-EmfT33UCuNEdtd9zuhgQClh7gidfPpkp93WO8GEfAP3cLD++UM1AG9jsTUitCI9DH5nF72XaFePME92r767dHA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.js"></script>
     <script src="script.js"></script>
 </body>
 </html>

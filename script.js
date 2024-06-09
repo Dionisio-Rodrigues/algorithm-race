@@ -1,33 +1,73 @@
-// Functionality for hiding and showing the sidebar
-document.getElementById('sidebar').addEventListener('dblclick', function () {
-  this.classList.toggle('hidden');
-});
+var matrix = null
+var nodes = new vis.DataSet();
+var edges = new vis.DataSet();
+var container = document.getElementById('mynetwork');
+var data = { nodes: nodes, edges: edges };
+var options = {
+  physics: true,
+  nodes: {
+    shape: 'circle',
+    size: 16,
+
+  }
+};
+var network = null
 
 document.getElementById('startButton').addEventListener('click', function () {
   const customCode = document.getElementById('codeInput').value;
   const executeCustomCode = document.getElementById('toggleCustomCode').checked;
-  // Placeholder function to draw graph based on adjacency matrix
   drawGraph();
-  // Placeholder function to execute algorithms and update time table
   executeAlgorithms(executeCustomCode, customCode);
 });
 
-function drawGraph() {
-  // Add your graph drawing logic here
-  document.getElementById('graph').textContent = 'Graph rendering...';
+window.onload = function () {
+  matrix = getRandomGraph()
+  drawGraph(matrix)
+}
+
+document.getElementById('genGraphBttn').addEventListener('click', function () {
+  matrix = getRandomGraph()
+  drawGraph(matrix)
+})
+
+function drawGraph(matrix) {
+  nodes.clear()
+  edges.clear()
+
+  for (var i = 0; i < matrix.length; i++) {
+    nodes.add({ id: i, label: '' + i });
+  }
+
+  for (var i = 0; i < matrix.length; i++) {
+    for (var j = 0; j < matrix[i].length; j++) {
+      if (matrix[i][j] !== 0) {
+        edges.add({ from: i, to: j, arrows: 'to', label: `${matrix[i][j]}` });
+      }
+    }
+  }
+
+  network = new vis.Network(container, data, options);
 }
 
 function executeAlgorithms(executeCustomCode, customCode) {
-  // Add your algorithm execution logic here
-  const algorithms = [['dijkstra', dijkstra], ['bellman-ford', bellmanFord]];
+  const algorithms = [['dijkstra', dijkstra], ['bellman-ford', bellmanFord], ['floyd-warshall', floydWarshall]];
   if (executeCustomCode) {
     customFunction = (adjMatrix, startNode, endNode) => eval(customCode);
-    algorithms.push(['custom_code', customFunction])
+    algorithms.push(['custom code', customFunction])
   }
-  console.log(algorithms)
+  const startNode = parseInt(document.getElementById('startNode').value);
+  const endNode = parseInt(document.getElementById('endNode').value);
   const timeTable = document.getElementById('timeTable');
   timeTable.innerHTML = '';
-  const matrix = getRandomGraph()
+
+  if (startNode == '' || endNode == '') {
+    alert(`Valores brancos não são permitidos`)
+    return
+  }
+  if (startNode < 0 || endNode < 0 || endNode > matrix.length - 1 || startNode > matrix.length - 1) {
+    alert(`Valor inválido, valores permitidos: de 0 a ${matrix.length - 1}`)
+    return
+  }
 
   algorithms.forEach(algorithm => {
     const row = document.createElement('tr');
@@ -47,7 +87,7 @@ function measureExecutionTime(func, ...args) {
   const result = func(...args);
   const end = Date.now();
   const executionTime = end - start;
-  return {time: executionTime};
+  return { time: executionTime };
 }
 
 function dijkstra(adjMatrix, startNode, endNode) {
@@ -107,42 +147,123 @@ function bellmanFord(adjMatrix, startNode, endNode) {
   return { weight: 25, path: [0, 1, 4, 3, 6, 8, 9] }
 }
 
+function floydWarshall(adjMatrix, startNode, endNode) {
+  return { weight: 25, path: [0, 1, 4, 3, 6, 8, 9] }
+}
+
 function getRandomGraph() {
 
   graphs = [
+    [
+      [0, 1, 1, 0],
+      [0, 0, 1, 1],
+      [0, 0, 0, 1],
+      [0, 0, 0, 0]
+    ],
 
-    [[0, 3, 6, 1, 8, 5, 1, 1, 9, 5, 4, 2, 4, 6, 7, 2, 8, 2, 3, 8, 1, 4, 8, 5, 1, 1, 5, 2, 1, 1],
-    [9, 0, 5, 4, 1, 5, 2, 5, 8, 5, 2, 8, 3, 5, 3, 1, 7, 1, 8, 2, 5, 4, 5, 8, 9, 3, 1, 2, 6, 2],
-    [3, 6, 0, 2, 6, 4, 4, 4, 1, 3, 2, 3, 4, 4, 1, 3, 7, 5, 3, 3, 5, 5, 8, 7, 6, 1, 8, 5, 1, 9],
-    [8, 5, 1, 0, 9, 5, 2, 8, 9, 3, 5, 2, 1, 8, 8, 6, 8, 3, 8, 7, 3, 3, 4, 7, 1, 6, 7, 1, 9, 7],
-    [5, 7, 4, 6, 0, 6, 2, 7, 8, 9, 6, 9, 8, 1, 2, 3, 8, 8, 3, 4, 3, 6, 5, 2, 1, 3, 4, 9, 9, 8],
-    [4, 2, 3, 6, 9, 0, 7, 5, 9, 5, 7, 3, 7, 8, 4, 8, 4, 2, 9, 5, 6, 7, 6, 8, 8, 7, 9, 2, 8, 9],
-    [8, 6, 1, 1, 9, 1, 0, 4, 9, 5, 6, 4, 6, 7, 2, 9, 9, 3, 6, 5, 9, 3, 4, 1, 5, 4, 5, 9, 9, 7],
-    [8, 2, 7, 7, 5, 8, 6, 0, 4, 6, 6, 4, 4, 4, 4, 1, 1, 2, 8, 4, 4, 1, 4, 7, 6, 6, 9, 5, 7, 1],
-    [8, 5, 6, 2, 1, 2, 7, 1, 0, 9, 7, 6, 1, 6, 4, 6, 4, 8, 1, 5, 2, 2, 9, 9, 5, 2, 2, 5, 3, 4],
-    [1, 1, 4, 3, 9, 6, 6, 7, 8, 0, 6, 5, 1, 1, 8, 5, 5, 2, 1, 7, 2, 1, 6, 1, 9, 8, 1, 5, 6, 2],
-    [9, 5, 6, 4, 7, 5, 3, 5, 4, 9, 0, 2, 8, 3, 1, 8, 2, 7, 7, 1, 1, 3, 5, 9, 2, 2, 5, 6, 7, 4],
-    [7, 1, 5, 5, 4, 3, 9, 3, 2, 2, 7, 0, 2, 8, 9, 2, 9, 9, 7, 5, 3, 2, 9, 9, 1, 7, 4, 7, 1, 6],
-    [9, 1, 8, 5, 7, 9, 5, 6, 9, 6, 4, 3, 0, 5, 8, 5, 1, 7, 8, 8, 2, 2, 3, 7, 2, 9, 7, 9, 7, 4],
-    [4, 4, 7, 9, 5, 6, 2, 5, 1, 3, 1, 7, 1, 0, 5, 2, 3, 4, 9, 9, 9, 4, 5, 8, 8, 8, 1, 7, 8, 4],
-    [6, 5, 4, 2, 1, 3, 6, 2, 2, 3, 5, 5, 3, 9, 0, 4, 7, 9, 4, 7, 6, 2, 7, 9, 4, 2, 7, 4, 4, 8],
-    [4, 1, 7, 3, 3, 1, 5, 9, 1, 9, 3, 3, 9, 8, 2, 0, 6, 7, 3, 6, 6, 6, 1, 5, 9, 8, 4, 2, 8, 2],
-    [3, 5, 8, 4, 6, 9, 1, 4, 7, 4, 4, 9, 2, 8, 1, 4, 0, 7, 7, 9, 8, 2, 3, 8, 9, 9, 3, 2, 4, 5],
-    [2, 4, 9, 3, 4, 5, 5, 3, 9, 7, 5, 5, 5, 9, 6, 1, 9, 0, 8, 2, 6, 5, 5, 1, 7, 2, 3, 7, 2, 1],
-    [7, 3, 4, 7, 4, 3, 2, 4, 3, 5, 8, 7, 5, 2, 8, 8, 5, 9, 0, 1, 3, 1, 3, 9, 8, 1, 5, 5, 1, 1],
-    [4, 3, 8, 2, 1, 9, 2, 9, 1, 1, 7, 2, 5, 4, 3, 3, 1, 8, 6, 0, 4, 6, 8, 4, 9, 1, 6, 2, 7, 4],
-    [5, 6, 2, 5, 5, 6, 7, 9, 4, 8, 4, 9, 9, 9, 1, 5, 9, 2, 3, 2, 0, 2, 9, 2, 5, 4, 1, 1, 9, 9],
-    [2, 6, 4, 2, 4, 4, 9, 6, 3, 9, 3, 7, 4, 2, 6, 3, 6, 7, 6, 2, 6, 0, 1, 6, 9, 4, 5, 9, 3, 8],
-    [9, 9, 1, 3, 3, 8, 8, 6, 8, 5, 1, 1, 3, 1, 3, 2, 3, 4, 4, 1, 3, 7, 0, 3, 6, 2, 7, 9, 4, 2],
-    [9, 9, 1, 3, 3, 8, 8, 6, 8, 5, 1, 1, 3, 1, 3, 2, 3, 4, 4, 1, 3, 7, 2, 0, 6, 2, 7, 9, 4, 2],
-    [5, 7, 4, 6, 0, 6, 2, 7, 8, 9, 6, 9, 8, 1, 2, 3, 8, 8, 3, 4, 3, 6, 5, 2, 0, 3, 4, 9, 9, 8],
-    [1, 1, 4, 3, 9, 6, 6, 7, 8, 0, 6, 5, 1, 1, 8, 5, 5, 2, 1, 7, 2, 1, 6, 1, 9, 0, 1, 5, 6, 2],
-    [9, 1, 8, 5, 7, 9, 5, 6, 9, 6, 4, 3, 0, 5, 8, 5, 1, 7, 8, 8, 2, 2, 3, 7, 2, 9, 0, 9, 7, 4],
-    [9, 0, 5, 4, 1, 5, 2, 5, 8, 5, 2, 8, 3, 5, 3, 1, 7, 1, 8, 2, 5, 4, 5, 8, 9, 3, 1, 0, 6, 2],
-    [7, 1, 5, 5, 4, 3, 9, 3, 2, 2, 7, 0, 2, 8, 9, 2, 9, 9, 7, 5, 3, 2, 9, 9, 1, 7, 4, 7, 0, 6],
-    [9, 1, 8, 5, 7, 9, 5, 6, 9, 6, 4, 3, 0, 5, 8, 5, 1, 7, 8, 8, 2, 2, 3, 7, 2, 9, 7, 9, 7, 0]]
+    [
+      [0, 0, 0, 0, 0, 0],
+      [7, 0, 5, 0, 2, 3],
+      [2, 0, 0, 4, 0, 6],
+      [0, 1, 4, 0, 0, 2],
+      [0, 6, 0, 3, 0, 1],
+      [0, 2, 3, 0, 5, 0]
+    ],
 
+    [
+      [0, 0, 0, 0, 0, 0],
+      [0, 0, 6, 0, 7, 2],
+      [3, 0, 0, 5, 0, 4],
+      [6, 4, 0, 0, 1, 0],
+      [0, 0, 3, 2, 0, 5],
+      [0, 2, 0, 3, 4, 0]
+    ],
+
+    [
+      [0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 5, 3, 7, 0, 2],
+      [0, 1, 0, 6, 0, 4, 0],
+      [0, 0, 2, 0, 0, 5, 6],
+      [3, 0, 0, 2, 0, 0, 1],
+      [0, 4, 6, 0, 1, 0, 0],
+      [2, 0, 3, 0, 0, 5, 0]
+    ],
+
+    [
+      [0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 6, 0, 4, 0, 3],
+      [3, 0, 0, 2, 5, 0, 0],
+      [0, 1, 0, 0, 0, 6, 4],
+      [0, 0, 3, 0, 0, 2, 5],
+      [4, 0, 0, 6, 0, 0, 1],
+      [0, 3, 0, 5, 2, 4, 0]
+    ],
+
+    [
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 2, 0, 3, 4, 0, 5],
+      [1, 0, 0, 3, 0, 0, 6, 0],
+      [0, 0, 4, 0, 2, 0, 1, 7],
+      [0, 1, 0, 6, 0, 0, 3, 0],
+      [0, 0, 3, 0, 4, 0, 2, 6],
+      [2, 0, 0, 5, 0, 3, 0, 4],
+      [0, 4, 0, 0, 1, 2, 3, 0]
+    ]
   ]
 
   return graphs[Math.floor(Math.random() * graphs.length)]
+}
+
+function addNode() {
+  nodeId = matrix.length
+  matrix.push(new Array(matrix.length).fill(0))
+  matrix.forEach(element => {
+    element.push(0)
+  });
+  nodes.add({ id: nodeId, label: `${nodeId}` });
+
+  console.log(matrix)
+}
+
+function removeNode() {
+  nodeId = matrix.length - 1
+  edges.forEach(function (edge) {
+    if (edge.from == nodeId || edge.to == nodeId) {
+      edges.remove(edge.id);
+    }
+  });
+  matrix.pop()
+  matrix.forEach(element => {
+    element.pop()
+  })
+  nodes.remove({ id: nodeId });
+
+  console.log(matrix)
+}
+
+function addEdge() {
+  var fromNode = parseInt(document.getElementById('fromNode').value);
+  var toNode = parseInt(document.getElementById('toNode').value);
+  var weight = parseInt(document.getElementById('weigthNode').value);
+
+  matrix[fromNode][toNode] = weight
+
+  if (fromNode !== "" && toNode !== "") {
+    edges.add({ from: fromNode, to: toNode, arrows: 'to', label: `${weight}` });
+  }
+
+  console.log(matrix)
+}
+
+function removeEdge() {
+  var fromNode = parseInt(document.getElementById('removeFromNode').value);
+  var toNode = parseInt(document.getElementById('removeToNode').value);
+
+  matrix[fromNode][toNode] = 0
+
+  if (fromNode !== "" && toNode !== "") {
+    edges.remove({ from: fromNode, to: toNode });
+  }
+
+  console.log(matrix)
 }
