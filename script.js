@@ -8,7 +8,6 @@ var options = {
   nodes: {
     shape: 'circle',
     size: 16,
-
   }
 };
 var network = null
@@ -16,7 +15,6 @@ var network = null
 document.getElementById('startButton').addEventListener('click', function () {
   const customCode = document.getElementById('codeInput').value;
   const executeCustomCode = document.getElementById('toggleCustomCode').checked;
-  drawGraph();
   executeAlgorithms(executeCustomCode, customCode);
 });
 
@@ -60,10 +58,11 @@ function executeAlgorithms(executeCustomCode, customCode) {
   const timeTable = document.getElementById('timeTable');
   timeTable.innerHTML = '';
 
-  if (startNode == '' || endNode == '') {
+  if (isNaN(startNode) || isNaN(endNode)) {
     alert(`Valores brancos não são permitidos`)
     return
   }
+
   if (startNode < 0 || endNode < 0 || endNode > matrix.length - 1 || startNode > matrix.length - 1) {
     alert(`Valor inválido, valores permitidos: de 0 a ${matrix.length - 1}`)
     return
@@ -83,9 +82,11 @@ function executeAlgorithms(executeCustomCode, customCode) {
 }
 
 function measureExecutionTime(func, ...args) {
-  const start = Date.now();
+  const start = performance.now();
   const result = func(...args);
-  const end = Date.now();
+  console.log(result)
+  const end = performance.now();
+  console.log(start, end)
   const executionTime = end - start;
   return { time: executionTime };
 }
@@ -143,24 +144,61 @@ function dijkstra(adjMatrix, startNode, endNode) {
   return { weight: distances[endNode], path: path };
 }
 
+
+
 function bellmanFord(adjMatrix, startNode, endNode) {
-  return { weight: 25, path: [0, 1, 4, 3, 6, 8, 9] }
+  const n = adjMatrix.length;
+  const distances = new Array(n).fill(Infinity);
+  const predecessors = new Array(n).fill(null);
+  distances[startNode] = 0;
+
+  for (let k = 0; k < n - 1; k++) {
+    for (let i = 0; i < n; i++) {
+      for (let j = 0; j < n; j++) {
+        if (adjMatrix[i][j] !== 0 && distances[i] !== Infinity && distances[j] > distances[i] + adjMatrix[i][j]) {
+          distances[j] = distances[i] + adjMatrix[i][j];
+          predecessors[j] = i;
+        }
+      }
+    }
+  }
+
+  for (let i = 0; i < n; i++) {
+    for (let j = 0; j < n; j++) {
+      if (adjMatrix[i][j] !== 0 && distances[i] !== Infinity && distances[j] > distances[i] + adjMatrix[i][j]) {
+        return { weight: distances[endNode]};
+      }
+    }
+  }
+
+  return { weight: distances[endNode]};
 }
 
 function floydWarshall(adjMatrix, startNode, endNode) {
-  return { weight: 25, path: [0, 1, 4, 3, 6, 8, 9] }
+  const n = adjMatrix.length;
+  const dist = adjMatrix.map(row => row.slice());
+
+  console.log(dist)
+
+  for (let k = 0; k < n; k++) {
+    for (let i = 0; i < n; i++) {
+      for (let j = 0; j < n; j++) {
+        
+        if (i !== j && dist[i][j] === 0)
+          dist[i][j] = Infinity
+
+        dist[i][j] = Math.min(dist[i][j], dist[i][k] + dist[k][j]);
+      }
+    }
+  }
+
+  return { weight: dist[startNode][endNode] };
 }
+
 
 function getRandomGraph() {
 
   graphs = [
-    [
-      [0, 1, 1, 0],
-      [0, 0, 1, 1],
-      [0, 0, 0, 1],
-      [0, 0, 0, 0]
-    ],
-
     [
       [0, 0, 0, 0, 0, 0],
       [7, 0, 5, 0, 2, 3],
@@ -177,37 +215,6 @@ function getRandomGraph() {
       [6, 4, 0, 0, 1, 0],
       [0, 0, 3, 2, 0, 5],
       [0, 2, 0, 3, 4, 0]
-    ],
-
-    [
-      [0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 5, 3, 7, 0, 2],
-      [0, 1, 0, 6, 0, 4, 0],
-      [0, 0, 2, 0, 0, 5, 6],
-      [3, 0, 0, 2, 0, 0, 1],
-      [0, 4, 6, 0, 1, 0, 0],
-      [2, 0, 3, 0, 0, 5, 0]
-    ],
-
-    [
-      [0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 6, 0, 4, 0, 3],
-      [3, 0, 0, 2, 5, 0, 0],
-      [0, 1, 0, 0, 0, 6, 4],
-      [0, 0, 3, 0, 0, 2, 5],
-      [4, 0, 0, 6, 0, 0, 1],
-      [0, 3, 0, 5, 2, 4, 0]
-    ],
-
-    [
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 2, 0, 3, 4, 0, 5],
-      [1, 0, 0, 3, 0, 0, 6, 0],
-      [0, 0, 4, 0, 2, 0, 1, 7],
-      [0, 1, 0, 6, 0, 0, 3, 0],
-      [0, 0, 3, 0, 4, 0, 2, 6],
-      [2, 0, 0, 5, 0, 3, 0, 4],
-      [0, 4, 0, 0, 1, 2, 3, 0]
     ]
   ]
 
@@ -221,8 +228,6 @@ function addNode() {
     element.push(0)
   });
   nodes.add({ id: nodeId, label: `${nodeId}` });
-
-  console.log(matrix)
 }
 
 function removeNode() {
@@ -237,8 +242,6 @@ function removeNode() {
     element.pop()
   })
   nodes.remove({ id: nodeId });
-
-  console.log(matrix)
 }
 
 function addEdge() {
@@ -248,11 +251,14 @@ function addEdge() {
 
   matrix[fromNode][toNode] = weight
 
-  if (fromNode !== "" && toNode !== "") {
-    edges.add({ from: fromNode, to: toNode, arrows: 'to', label: `${weight}` });
+  if (!isNaN(fromNode) && !isNaN(toNode)) {
+    network.body.data.edges.add({
+      from: fromNode,
+      to: toNode,
+      arrows: 'to',
+      label: `${weight}`
+    });
   }
-
-  console.log(matrix)
 }
 
 function removeEdge() {
@@ -261,9 +267,13 @@ function removeEdge() {
 
   matrix[fromNode][toNode] = 0
 
-  if (fromNode !== "" && toNode !== "") {
-    edges.remove({ from: fromNode, to: toNode });
+  if (!isNaN(fromNode) && !isNaN(toNode)) {
+    let edges = network.getConnectedEdges(fromNode);
+    for (let edge of edges) {
+      if (toNode == network.body.edges[edge].to.id) {
+        network.body.data.edges.remove(edge);
+        break;
+      }
+    }
   }
-
-  console.log(matrix)
 }
