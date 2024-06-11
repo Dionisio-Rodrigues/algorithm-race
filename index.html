@@ -1,45 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.css" rel="stylesheet" type="text/css" />
 </head>
+
 <body>
     <div class="sidebar" id="sidebar">
+        <p>Insira abaixo seu código customizado e veja os resultados!</p>
+        <div class="input-container">
+            <textarea id="codeInput" placeholder="Insira o seu código em javascript aqui..."></textarea>
+        </div>
         <p>function customCode(adjMatrix, startNode, endNode) {</p>
-            <p>let dist = Infinity</p>
-        <textarea id="codeInput" placeholder="Enter your JavaScript code here..."></textarea>
+        <p>let dist = Infinity</p>
         <p>return {weigth: dist}</p>
         <p>}</p>
-    </div>
-    <div class="content">
-        <div class="graph" id="graph">
-            <div id="mynetwork"></div>
-        </div>
-        <button id="genGraphBttn">generate graph</button>
-        <div>
-            <h3>Add Node</h3>
-            <button onclick="addNode()">Add Node</button>
-        </div>
-        <div>
-            <h3>Remove Node</h3>
-            <button onclick="removeNode()">Remove Node</button>
-        </div>
-        <div>
-            <h3>Add Edge</h3>
-            <input type="number" id="fromNode" placeholder="From Node ID">
-            <input type="number" id="toNode" placeholder="To Node ID">
-            <input type="number" id="weigthNode" placeholder="weigth">
-            <button onclick="addEdge()">Add Edge</button>
-        </div>
-        <div style="margin-bottom: 40px;">
-            <h3>Remove Edge</h3>
-            <input type="number" id="removeFromNode" placeholder="From Node ID">
-            <input type="number" id="removeToNode" placeholder="To Node ID">
-            <button onclick="removeEdge()">Remove Edge</button>
-        </div>
         <div class="table-container">
             <table>
                 <thead>
@@ -52,24 +30,58 @@
                 </tbody>
             </table>
         </div>
-        <div class="controls">
-
-            <label for="startNode">start node:</label>
-            <input placeholder="Ex: 0" type="text" id="startNode">
-
-            <label for="endNode">end node:</label>
-            <input placeholder="Ex: 7" type="text" id="endNode">
-
-            <div>
-                <label for="toggleCustomCode">Execute Custom Code</label>
-                <input type="checkbox" id="toggleCustomCode">
+    </div>
+    <div class="content">
+        <div class="graph" id="graph">
+            <div id="mynetwork"></div>
+        </div>
+        <div class="container">
+            <button id="genGraphBttn">generate graph</button>
+            <div class="buttons">
+                <div>
+                    <h3>Add Node</h3>
+                    <button onclick="addNode()">Add Node</button>
+                </div>
+                <div>
+                    <h3>Remove Node</h3>
+                    <button onclick="removeNode()">Remove Node</button>
+                </div>
             </div>
+            <div class="row">
+                <div class="edge">
+                    <h3>Add Edge</h3>
+                    <input type="number" id="fromNode" placeholder="From Node ID">
+                    <input type="number" id="toNode" placeholder="To Node ID">
+                    <input type="number" id="weigthNode" placeholder="weigth">
+                    <button onclick="addEdge()">Add Edge</button>
+                </div>
+                <div class="edge">
+                    <h3>Remove Edge</h3>
+                    <input type="number" id="removeFromNode" placeholder="From Node ID">
+                    <input type="number" id="removeToNode" placeholder="To Node ID">
+                    <button onclick="removeEdge()">Remove Edge</button>
+                </div>
+            </div>
+            <div class="controls">
 
-            <button id="startButton">Start</button>
+                <label for="startNode">start node:</label>
+                <input placeholder="Ex: 0" type="text" id="startNode">
+
+                <label for="endNode">end node:</label>
+                <input placeholder="Ex: 7" type="text" id="endNode">
+
+                <div>
+                    <label for="toggleCustomCode">Execute Custom Code</label>
+                    <input type="checkbox" id="toggleCustomCode">
+                </div>
+
+                <button id="startButton">Start</button>
+            </div>
         </div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.js"></script>
     <script src="script.js"></script>
 </body>
+
 </html>
