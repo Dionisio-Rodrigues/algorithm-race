@@ -4,7 +4,7 @@ var edges = new vis.DataSet();
 var container = document.getElementById('mynetwork');
 var data = { nodes: nodes, edges: edges };
 var options = {
-  physics: true,
+  physics: false,
   nodes: {
     shape: 'circle',
     size: 16,
@@ -25,7 +25,6 @@ window.onload = function () {
 
 document.getElementById('genGraphBttn').addEventListener('click', function () {
   matrix = getRandomGraph()
-  console.log(matrix)
   drawGraph(matrix)
 })
 
@@ -51,8 +50,12 @@ function drawGraph(matrix) {
 function executeAlgorithms(executeCustomCode, customCode) {
   const algorithms = [['dijkstra', dijkstra], ['bellman-ford', bellmanFord], ['floyd-warshall', floydWarshall]];
   if (executeCustomCode) {
-    customFunction = (adjMatrix, startNode, endNode) => eval(customCode);
-    algorithms.push(['custom code', customFunction])
+    customFunction = (adjMatrix, startNode, endNode) => {
+      let dist = Infinity
+      eval(customCode)
+      return {weight: dist}
+    };
+    algorithms.push(['customCode', customFunction])
   }
   const startNode = parseInt(document.getElementById('startNode').value);
   const endNode = parseInt(document.getElementById('endNode').value);
@@ -75,7 +78,7 @@ function executeAlgorithms(executeCustomCode, customCode) {
     const timeCell = document.createElement('td');
     nameCell.textContent = algorithm[0];
     let result = measureExecutionTime(algorithm[1], matrix, startNode, endNode);
-    timeCell.textContent = `${result.time}`;
+    timeCell.textContent = `${result.time.toFixed(2)} ms`;
     row.appendChild(nameCell);
     row.appendChild(timeCell);
     timeTable.appendChild(row);
@@ -83,11 +86,13 @@ function executeAlgorithms(executeCustomCode, customCode) {
 }
 
 function measureExecutionTime(func, ...args) {
+  for (let i = 0; i < 100; i++)
+    func(...args);
   const start = performance.now();
-  const result = func(...args);
-  console.log(result)
+  let result
+  for (let i = 0; i < 100000; i++)
+    result = func(...args);
   const end = performance.now();
-  console.log(start, end)
   const executionTime = end - start;
   return { time: executionTime };
 }
@@ -167,6 +172,7 @@ function getRandomGraph() {
   ]
 
   return graphs[Math.floor(Math.random() * graphs.length)]
+
 }
 
 function addNode() {
@@ -227,4 +233,21 @@ function removeEdge() {
       }
     }
   }
+}
+
+function generateDenseAdjMatrix(size) {
+  const adjMatrix = Array.from({ length: size }, () => Array(size).fill(Infinity));
+
+  for (let i = 0; i < size; i++) {
+      for (let j = 0; j < size; j++) {
+          if (i !== j) {
+              // Define um peso aleatório entre 1 e 100
+              adjMatrix[i][j] = Math.floor(Math.random() * 100) + 1;
+          } else {
+              adjMatrix[i][j] = 0; // Auto-laços com peso 0
+          }
+      }
+  }
+
+  return adjMatrix;
 }
