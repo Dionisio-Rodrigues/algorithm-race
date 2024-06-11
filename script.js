@@ -25,6 +25,7 @@ window.onload = function () {
 
 document.getElementById('genGraphBttn').addEventListener('click', function () {
   matrix = getRandomGraph()
+  console.log(matrix)
   drawGraph(matrix)
 })
 
@@ -38,7 +39,7 @@ function drawGraph(matrix) {
 
   for (var i = 0; i < matrix.length; i++) {
     for (var j = 0; j < matrix[i].length; j++) {
-      if (matrix[i][j] !== 0) {
+      if (matrix[i][j] !== Infinity && i !== j) {
         edges.add({ from: i, to: j, arrows: 'to', label: `${matrix[i][j]}` });
       }
     }
@@ -73,7 +74,7 @@ function executeAlgorithms(executeCustomCode, customCode) {
     const nameCell = document.createElement('td');
     const timeCell = document.createElement('td');
     nameCell.textContent = algorithm[0];
-    let result = measureExecutionTime(algorithm[1], matrix, 0, matrix.length - 1);
+    let result = measureExecutionTime(algorithm[1], matrix, startNode, endNode);
     timeCell.textContent = `${result.time}`;
     row.appendChild(nameCell);
     row.appendChild(timeCell);
@@ -92,101 +93,52 @@ function measureExecutionTime(func, ...args) {
 }
 
 function dijkstra(adjMatrix, startNode, endNode) {
-  const numNodes = adjMatrix.length;
-  const distances = new Array(numNodes).fill(Infinity);
-  const previousNodes = new Array(numNodes).fill(null);
-  const visited = new Array(numNodes).fill(false);
-
+  const numVertices = adjMatrix.length;
+  const distances = Array(numVertices).fill(Infinity);
+  const visited = Array(numVertices).fill(false);
+  const priorityQueue = [[0, startNode]];
   distances[startNode] = 0;
 
-  while (true) {
-    let closestNode = -1;
-    let shortestDistance = Infinity;
+  while (priorityQueue.length > 0) {
+    priorityQueue.sort((a, b) => a[0] - b[0]);
+    const [currentDistance, currentVertex] = priorityQueue.shift();
 
-    for (let i = 0; i < numNodes; i++) {
-      if (!visited[i] && distances[i] < shortestDistance) {
-        closestNode = i;
-        shortestDistance = distances[i];
-      }
+    if (visited[currentVertex]) {
+      continue;
     }
 
-    if (closestNode === -1) {
+    visited[currentVertex] = true;
+
+    if (currentVertex === endNode) {
       break;
     }
 
-    visited[closestNode] = true;
-
-    for (let i = 0; i < numNodes; i++) {
-      const edgeWeight = adjMatrix[closestNode][i];
-      if (edgeWeight > 0) {
-        const alternativeDistance = distances[closestNode] + edgeWeight;
-        if (alternativeDistance < distances[i]) {
-          distances[i] = alternativeDistance;
-          previousNodes[i] = closestNode;
+    for (let neighbor = 0; neighbor < numVertices; neighbor++) {
+      if (adjMatrix[currentVertex][neighbor] !== Infinity && !visited[neighbor]) {
+        const distance = currentDistance + adjMatrix[currentVertex][neighbor];
+        if (distance < distances[neighbor]) {
+          distances[neighbor] = distance;
+          priorityQueue.push([distance, neighbor]);
         }
       }
     }
   }
 
-  const path = [];
-  let currentNode = endNode;
-
-  while (currentNode !== null) {
-    path.unshift(currentNode);
-    currentNode = previousNodes[currentNode];
-  }
-
-
-  if (path[0] !== startNode) {
-    return { weight: Infinity, path: [] };
-  }
-
-  return { weight: distances[endNode], path: path };
+  return { weight : distances[endNode]};
 }
 
 
-
 function bellmanFord(adjMatrix, startNode, endNode) {
-  const n = adjMatrix.length;
-  const distances = new Array(n).fill(Infinity);
-  const predecessors = new Array(n).fill(null);
-  distances[startNode] = 0;
-
-  for (let k = 0; k < n - 1; k++) {
-    for (let i = 0; i < n; i++) {
-      for (let j = 0; j < n; j++) {
-        if (adjMatrix[i][j] !== 0 && distances[i] !== Infinity && distances[j] > distances[i] + adjMatrix[i][j]) {
-          distances[j] = distances[i] + adjMatrix[i][j];
-          predecessors[j] = i;
-        }
-      }
-    }
-  }
-
-  for (let i = 0; i < n; i++) {
-    for (let j = 0; j < n; j++) {
-      if (adjMatrix[i][j] !== 0 && distances[i] !== Infinity && distances[j] > distances[i] + adjMatrix[i][j]) {
-        return { weight: distances[endNode]};
-      }
-    }
-  }
-
-  return { weight: distances[endNode]};
+  return { weight: 0 };
 }
 
 function floydWarshall(adjMatrix, startNode, endNode) {
   const n = adjMatrix.length;
   const dist = adjMatrix.map(row => row.slice());
 
-  console.log(dist)
-
   for (let k = 0; k < n; k++) {
     for (let i = 0; i < n; i++) {
       for (let j = 0; j < n; j++) {
-        
-        if (i !== j && dist[i][j] === 0)
-          dist[i][j] = Infinity
-
         dist[i][j] = Math.min(dist[i][j], dist[i][k] + dist[k][j]);
       }
     }
@@ -197,24 +149,20 @@ function floydWarshall(adjMatrix, startNode, endNode) {
 
 
 function getRandomGraph() {
+  i = Infinity
 
   graphs = [
     [
-      [0, 0, 0, 0, 0, 0],
-      [7, 0, 5, 0, 2, 3],
-      [2, 0, 0, 4, 0, 6],
-      [0, 1, 4, 0, 0, 2],
-      [0, 6, 0, 3, 0, 1],
-      [0, 2, 3, 0, 5, 0]
-    ],
-
-    [
-      [0, 0, 0, 0, 0, 0],
-      [0, 0, 6, 0, 7, 2],
-      [3, 0, 0, 5, 0, 4],
-      [6, 4, 0, 0, 1, 0],
-      [0, 0, 3, 2, 0, 5],
-      [0, 2, 0, 3, 4, 0]
+      [0, 7, i, 3, 10, i, i, 2, i, 1],
+      [7, 0, 5, i, i, i, 8, i, 3, i],
+      [i, 5, 0, 2, 4, i, i, i, 9, 6],
+      [3, i, 2, 0, i, 7, 1, i, i, i],
+      [10, i, 4, i, 0, 5, i, 6, i, 8],
+      [i, i, i, 7, 5, 0, 9, i, i, 2],
+      [i, 8, i, 1, i, 9, 0, 4, 3, i],
+      [2, i, i, i, 6, i, 4, 0, 5, i],
+      [i, 3, 9, i, i, i, 3, 5, 0, 7],
+      [1, i, 6, i, 8, 2, i, i, 7, 0]
     ]
   ]
 
@@ -223,10 +171,11 @@ function getRandomGraph() {
 
 function addNode() {
   nodeId = matrix.length
-  matrix.push(new Array(matrix.length).fill(0))
+  matrix.push(new Array(matrix.length).fill(Infinity))
   matrix.forEach(element => {
-    element.push(0)
+    element.push(Infinity)
   });
+  matrix[nodeId][nodeId] = 0
   nodes.add({ id: nodeId, label: `${nodeId}` });
 }
 
@@ -249,9 +198,11 @@ function addEdge() {
   var toNode = parseInt(document.getElementById('toNode').value);
   var weight = parseInt(document.getElementById('weigthNode').value);
 
-  matrix[fromNode][toNode] = weight
+  if (!isNaN(fromNode) && !isNaN(toNode) && !isNaN(weight)) {
 
-  if (!isNaN(fromNode) && !isNaN(toNode)) {
+    if (weight == 0) return
+
+    matrix[fromNode][toNode] = weight
     network.body.data.edges.add({
       from: fromNode,
       to: toNode,
