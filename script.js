@@ -4,7 +4,7 @@ var edges = new vis.DataSet();
 var container = document.getElementById('mynetwork');
 var data = { nodes: nodes, edges: edges };
 var options = {
-  physics: false,
+  physics: true,
   nodes: {
     shape: 'circle',
     size: 16,
@@ -92,6 +92,7 @@ function measureExecutionTime(func, ...args) {
   let result
   for (let i = 0; i < 100000; i++)
     result = func(...args);
+  console.log(result)
   const end = performance.now();
   const executionTime = end - start;
   return { time: executionTime };
@@ -134,7 +135,30 @@ function dijkstra(adjMatrix, startNode, endNode) {
 
 
 function bellmanFord(adjMatrix, startNode, endNode) {
-  return { weight: 0 };
+  const numVertices = adjMatrix.length;
+  const distances = Array(numVertices).fill(Infinity);
+  distances[startNode] = 0;
+
+  for (let i = 0; i < numVertices - 1; i++) {
+    for (let u = 0; u < numVertices; u++) {
+      for (let v = 0; v < numVertices; v++) {
+        if (adjMatrix[u][v] !== Infinity && distances[u] + adjMatrix[u][v] < distances[v]) {
+          distances[v] = distances[u] + adjMatrix[u][v];
+        }
+      }
+    }
+  }
+
+  for (let u = 0; u < numVertices; u++) {
+    for (let v = 0; v < numVertices; v++) {
+      if (adjMatrix[u][v] !== Infinity && distances[u] + adjMatrix[u][v] < distances[v]) {
+        console.error('O grafo contém um ciclo negativo');
+        return { weight: Infinity };
+      }
+    }
+  }
+
+  return { weight: distances[endNode]};
 }
 
 function floydWarshall(adjMatrix, startNode, endNode) {
